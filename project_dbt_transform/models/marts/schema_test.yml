@@ -1,0 +1,83 @@
+version: 2
+
+models:
+  - name: dim_products
+    columns:
+      - name: product_id
+        tests:
+          - unique
+          - not_null
+      - name: category_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_categories')
+                field: category_id
+
+  - name: dim_categories
+    columns:
+      - name: category_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_customers
+    columns:
+      - name: customer_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_employees
+    columns:
+      - name: employee_id
+        tests:
+          - unique
+          - not_null
+      - name: reports_to
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_employees')
+                field: employee_id
+
+  - name: dim_suppliers
+    columns:
+      - name: supplier_id
+        tests:
+          - unique
+          - not_null
+
+  - name: dim_shippers
+    columns:
+      - name: shipper_id
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_orders
+    columns:
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+      - name: employee_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_employees')
+                field: employee_id
+      - name: product_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_products')
+                field: product_id
+      - name: shipper_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_shippers')
+                field: shipper_id
