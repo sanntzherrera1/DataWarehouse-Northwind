@@ -57,6 +57,10 @@ models:
 
   - name: fct_orders
     columns:
+      - name: order_id
+        tests:
+          - unique
+          - not_null
       - name: customer_id
         tests:
           - relationships:
@@ -69,12 +73,39 @@ models:
               arguments:
                 to: ref('dim_employees')
                 field: employee_id
+      - name: shipper_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_shippers')
+                field: shipper_id
+
+  - name: fct_order_lines
+    columns:
+      - name: order_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('fct_orders')
+                field: order_id
       - name: product_id
         tests:
           - relationships:
               arguments:
                 to: ref('dim_products')
                 field: product_id
+      - name: customer_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_customers')
+                field: customer_id
+      - name: employee_id
+        tests:
+          - relationships:
+              arguments:
+                to: ref('dim_employees')
+                field: employee_id
       - name: shipper_id
         tests:
           - relationships:
