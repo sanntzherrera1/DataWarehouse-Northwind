@@ -1,4 +1,5 @@
 # Northwind Data Warehouse (dbt + PostgreSQL)
+[![dbt ci](https://github.com/sanntzherrera1/DataWarehouse-Northwind/actions/workflows/dbt-ci.yml/badge.svg)](https://github.com/sanntzherrera1/DataWarehouse-Northwind/actions/workflows/dbt-ci.yml)
 
 Pipeline ELT que transforma la base transaccional **Northwind** en un modelo dimensional (star schema) usando **dbt**, sobre **PostgreSQL** levantado con **Docker**.
 
@@ -8,7 +9,7 @@ Convertir datos crudos de una base transaccional (ventas, clientes, productos) e
 
 ## 🛠️ Stack
 
-PostgreSQL (Docker) · dbt Core · Python · DBeaver
+PostgreSQL (Docker) · dbt Core · Python · GitHub Actions · DBeaver
 
 ## 🏗️ Arquitectura
 
@@ -45,6 +46,12 @@ Orquestado con Airflow
 - 24 genéricos (`unique`, `not_null`, `relationships`) para validar la integridad del modelo.
 - 1 test singular que reconcilia el total de `freight` entre la fuente y `fct_orders`, para detectar pérdida o duplicación de datos.
 
+## 🔁 Integración continua
+
+En cada push, GitHub Actions recrea el proyecto desde cero en una máquina limpia: levanta Postgres, carga Northwind y corre `dbt build` con todos los modelos y tests. Si algo se rompe, el badge se pone en rojo; así me aseguro de que el proyecto funciona fuera de mi PC y de que ningún cambio rompe lo que ya estaba validado.
+
+Las credenciales no están en el código: el perfil de `ci/profiles.yml` las lee de variables de entorno.
+
 ## 🚀 Cómo levantarlo
 
 1. Copiá `.env.example` a `.env` y completá tus valores.
@@ -78,6 +85,7 @@ Requiere configurar la conexión en `~/.dbt/profiles.yml` con los mismos datos d
 - [x] Staging: 8 modelos
 - [x] Marts: 6 dimensiones + 2 tablas de hechos
 - [x] Tests de calidad (25 tests)
+- [x] CI con GitHub Actions (`dbt build` en cada push)
 - [x] Documentación con dbt docs
 - [ ] Ingesta incremental a Cloud Storage y BigQuery
 - [ ] Orquestación con Airflow
