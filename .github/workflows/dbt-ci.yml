@@ -1,0 +1,44 @@
+name: dbt ci
+
+on: push
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_user
+          POSTGRES_PASSWORD: ci_password
+          POSTGRES_DB: northwind_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      POSTGRES_USER: ci_user
+      POSTGRES_PASSWORD: ci_password
+      POSTGRES_DB: northwind_ci
+      PGPASSWORD: ci_password
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Cargar Northwind
+        run: psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -v ON_ERROR_STOP=1 -f db/northwind.sql
+
+      - name: Correr la ejecucion de dbt
+        run: dbt build --project-dir project_dbt_transform --profiles-dir ci
