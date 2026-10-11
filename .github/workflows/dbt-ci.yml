@@ -40,8 +40,8 @@ jobs:
       - name: Cargar Northwind
         run: psql -h localhost -U $POSTGRES_USER -d $POSTGRES_DB -v ON_ERROR_STOP=1 -f db/northwind.sql
 
-      - name: Instalar paquete de dbt 
-        run: dbt deps --profiles-dir ci
-
+      - name: Instalar paquete de dbt
+        run: dbt deps --project-dir project_dbt_transform --profiles-dir ci
+        
       - name: Correr la ejecucion de dbt
         run: dbt build --project-dir project_dbt_transform --profiles-dir ci
