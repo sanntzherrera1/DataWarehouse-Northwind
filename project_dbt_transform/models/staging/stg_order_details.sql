@@ -1,8 +1,8 @@
 select
     order_id,
     product_id,
-    unit_price,
+    cast(unit_price as numeric(10,2)) as unit_price,
     quantity,
-    discount
+    cast(discount as numeric(3,2)) as discount
 
-from {{source ('northwind','order_details')}}
+from {{ source('northwind','order_details') }}

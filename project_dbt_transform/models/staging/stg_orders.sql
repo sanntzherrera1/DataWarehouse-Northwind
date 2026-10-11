@@ -6,7 +6,7 @@ select
     required_date,
     shipped_date,
     ship_via as shipper_id,
-    freight,
+    cast(freight as numeric(10,2)) as freight,
     ship_name,
     ship_address,
     ship_city,
@@ -14,4 +14,4 @@ select
     ship_postal_code,
     ship_country
 
-from {{source ('northwind','orders')}}
+from {{ source('northwind','orders') }}
