@@ -4,38 +4,44 @@ models:
   - name: dim_products
     columns:
       - name: product_id
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: category_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_categories')
                 field: category_id
+      - name: supplier_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('dim_suppliers')
+                field: supplier_id
 
   - name: dim_categories
     columns:
       - name: category_id
-        tests:
+        data_tests:
           - unique
           - not_null
 
   - name: dim_customers
     columns:
       - name: customer_id
-        tests:
+        data_tests:
           - unique
           - not_null
 
   - name: dim_employees
     columns:
       - name: employee_id
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: reports_to
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_employees')
@@ -44,70 +50,78 @@ models:
   - name: dim_suppliers
     columns:
       - name: supplier_id
-        tests:
+        data_tests:
           - unique
           - not_null
 
   - name: dim_shippers
     columns:
       - name: shipper_id
-        tests:
+        data_tests:
           - unique
           - not_null
 
   - name: fct_orders
     columns:
       - name: order_id
-        tests:
+        data_tests:
           - unique
           - not_null
       - name: customer_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_customers')
                 field: customer_id
       - name: employee_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_employees')
                 field: employee_id
       - name: shipper_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_shippers')
                 field: shipper_id
 
   - name: fct_order_lines
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - product_id
     columns:
       - name: order_id
-        tests:
+        data_tests:
+          - not_null
           - relationships:
               arguments:
                 to: ref('fct_orders')
                 field: order_id
       - name: product_id
-        tests:
+        data_tests:
+          - not_null
           - relationships:
               arguments:
                 to: ref('dim_products')
                 field: product_id
       - name: customer_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_customers')
                 field: customer_id
       - name: employee_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_employees')
                 field: employee_id
       - name: shipper_id
-        tests:
+        data_tests:
           - relationships:
               arguments:
                 to: ref('dim_shippers')
