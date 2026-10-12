@@ -42,9 +42,13 @@ Orquestado con Airflow
 
 ## ✅ Calidad de datos
 
-25 tests en total:
-- 24 genéricos (`unique`, `not_null`, `relationships`) para validar la integridad del modelo.
-- 1 test singular que reconcilia el total de `freight` entre la fuente y `fct_orders`, para detectar pérdida o duplicación de datos.
+65 tests, en cada capa:
+- **Fuente (15):** claves primarias únicas y no nulas.
+- **Staging (21):** claves, rangos (precios, cantidades, descuentos) y fechas coherentes.
+- **Marts (28):** integridad entre dimensiones y hechos, y grain de `fct_order_lines`.
+- **Reconciliación (1):** el total de `freight` de `fct_orders` coincide exactamente con la fuente.
+
+Las decisiones de diseño están documentadas en [`docs/decisions.md`](docs/decisions.md).
 
 ## 🔁 Integración continua
 
@@ -73,6 +77,7 @@ python -m venv venv
 venv\Scripts\activate
 pip install -r requirements.txt
 cd project_dbt_transform
+dbt deps
 dbt build
 ```
 
@@ -84,7 +89,7 @@ Requiere configurar la conexión en `~/.dbt/profiles.yml` con los mismos datos d
 - [x] Carga automática de Northwind al levantar Docker
 - [x] Staging: 8 modelos
 - [x] Marts: 6 dimensiones + 2 tablas de hechos
-- [x] Tests de calidad (25 tests)
+- [x] Tests de calidad en fuente, staging y marts (65 tests)
 - [x] CI con GitHub Actions (`dbt build` en cada push)
 - [x] Documentación con dbt docs
 - [ ] Ingesta incremental a Cloud Storage y BigQuery
