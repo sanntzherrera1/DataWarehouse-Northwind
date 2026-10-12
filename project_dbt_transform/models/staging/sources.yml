@@ -1,14 +1,83 @@
-version: 2 
+version: 2
 
 sources:
   - name: northwind
+    description: >
+      Base transaccional Northwind en PostgreSQL: ventas de una distribuidora de
+      alimentos (órdenes, clientes, productos, empleados y proveedores).
+      Se carga desde db/northwind.sql al levantar Docker.
     schema: public
     tables:
       - name: customers
+        description: Clientes que realizan órdenes. Una fila por cliente.
+        columns:
+          - name: customer_id
+            description: Clave primaria. Código de 5 letras del cliente.
+            data_tests:
+              - unique
+              - not_null
+
       - name: orders
+        description: Encabezado de cada orden de venta. Una fila por orden.
+        columns:
+          - name: order_id
+            description: Clave primaria de la orden.
+            data_tests:
+              - unique
+              - not_null
+
       - name: order_details
+        description: >
+          Líneas de cada orden: qué producto, cuántas unidades, a qué precio y con
+          qué descuento. Una fila por producto dentro de una orden.
+        data_tests:
+          - dbt_utils.unique_combination_of_columns:
+              arguments:
+                combination_of_columns:
+                  - order_id
+                  - product_id
+
       - name: products
+        description: Catálogo de productos. Una fila por producto.
+        columns:
+          - name: product_id
+            description: Clave primaria del producto.
+            data_tests:
+              - unique
+              - not_null
+
       - name: employees
+        description: Empleados que gestionan las órdenes. Una fila por empleado.
+        columns:
+          - name: employee_id
+            description: Clave primaria del empleado.
+            data_tests:
+              - unique
+              - not_null
+
       - name: categories
+        description: Categorías de productos. Una fila por categoría.
+        columns:
+          - name: category_id
+            description: Clave primaria de la categoría.
+            data_tests:
+              - unique
+              - not_null
+
       - name: suppliers
+        description: Proveedores de los productos. Una fila por proveedor.
+        columns:
+          - name: supplier_id
+            description: Clave primaria del proveedor.
+            data_tests:
+              - unique
+              - not_null
+
       - name: shippers
+        description: Empresas de transporte que despachan las órdenes. Una fila por transportista.
+        columns:
+          - name: shipper_id
+            description: Clave primaria del transportista.
+            data_tests:
+              - unique
+              - not_null
