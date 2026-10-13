@@ -12,4 +12,4 @@ select
     l.total as total_lineas,
     o.total as total_ordenes
 from lineas l, ordenes o
-where l.total is distinct fro  m o.total 
+where l.total is distinct from o.total 
