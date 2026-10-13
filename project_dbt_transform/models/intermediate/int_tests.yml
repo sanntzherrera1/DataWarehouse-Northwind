@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: int_order_lines_enriched
+    description: >
+      Una fila por línea de orden (order_id + product_id), enriquecida con datos
+      de la orden y del producto. Acá vive la regla del monto de la línea.
+    data_tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - order_id
+              - product_id
+    columns:
+      - name: order_id
+        data_tests:
+          - not_null
+      - name: product_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('stg_products')
+                field: product_id
+              config:
+                severity: warn
+      - name: total_line_amount
+        description: "unit_price * quantity * (1 - discount). No incluye freight."
+        data_tests:
+          - not_null
