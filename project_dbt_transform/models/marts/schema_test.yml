@@ -11,21 +11,14 @@ models:
         data_tests:
           - relationships:
               arguments:
-                to: ref('dim_categories')
+                to: ref('stg_categories')
                 field: category_id
       - name: supplier_id
         data_tests:
           - relationships:
               arguments:
-                to: ref('dim_suppliers')
+                to: ref('stg_suppliers')
                 field: supplier_id
-
-  - name: dim_categories
-    columns:
-      - name: category_id
-        data_tests:
-          - unique
-          - not_null
 
   - name: dim_customers
     columns:
@@ -46,13 +39,6 @@ models:
               arguments:
                 to: ref('dim_employees')
                 field: employee_id
-
-  - name: dim_suppliers
-    columns:
-      - name: supplier_id
-        data_tests:
-          - unique
-          - not_null
 
   - name: dim_shippers
     columns:
