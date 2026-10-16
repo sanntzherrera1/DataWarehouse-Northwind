@@ -76,3 +76,26 @@ Llevar todo a estrella: cada dimensión cuelga directo de las facts.
   corrida: si cambia un nombre en la fuente, se actualiza en todas las filas.
 - La capa de staging sigue normalizada, 1 a 1 con la fuente. Solo se
   desnormaliza la capa de presentación.
+
+
+## ADR-003: BigQuery como data warehouse
+
+**Fecha:** 2026-10-15
+**Estado:** Aceptada
+
+### Contexto
+Postgres local hoy es fuente y warehouse a la vez. El proyecto necesita un
+warehouse en la nube, separado de la fuente.
+
+### Decisión
+BigQuery como warehouse (dbt-bigquery). Postgres queda solo como fuente.
+Se arranca en el sandbox, sin costo.
+
+### Alternativas
+- Postgres: no es un motor analítico.
+- Snowflake / Databricks: más complejos y sin integración nativa con Gemini.
+
+### Consecuencias
+- Serverless, todo en Google Cloud (Storage, Looker, Gemini).
+- Hay que adaptar SQL de Postgres (ver ADR-004).
+- Sin claves foráneas: la integridad queda en los tests de dbt.
