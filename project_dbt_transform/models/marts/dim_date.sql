@@ -1,5 +1,3 @@
--- Calendario: una fila por día, de 1996-01-01 a 1998-12-31.
--- Cubre todas las fechas de orders. Se generan todos los días, haya ventas o no.
 with days as (
 
     {{ dbt_utils.date_spine(
@@ -11,11 +9,11 @@ with days as (
 )
 
 select
-    cast(date_day as date)                   as date_day,
-    extract(year from date_day)::int         as year,
-    extract(quarter from date_day)::int      as quarter,
-    extract(month from date_day)::int        as month,
-    trim(to_char(date_day, 'Month'))         as month_name,
-    extract(isodow from date_day)::int       as day_of_week,   -- 1 = lunes ... 7 = domingo
-    extract(isodow from date_day) in (6, 7)  as is_weekend
+    cast(date_day as date)                        as date_day,
+    cast(extract(year from date_day) as int)      as year,
+    cast(extract(quarter from date_day) as int)   as quarter,
+    cast(extract(month from date_day) as int)     as month,
+    {{ month_name('date_day') }}                   as month_name,
+    {{ day_of_week_iso('date_day') }}              as day_of_week,
+    {{ day_of_week_iso('date_day') }} in (6, 7)   as is_weekend
 from days

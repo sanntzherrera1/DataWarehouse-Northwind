@@ -3,10 +3,11 @@ version: 2
 sources:
   - name: northwind
     description: >
-      Base transaccional Northwind en PostgreSQL: ventas de una distribuidora de
-      alimentos (órdenes, clientes, productos, empleados y proveedores).
-      Se carga desde db/northwind.sql al levantar Docker.
-    schema: public
+        Base transaccional Northwind: ventas de una distribuidora de alimentos.
+        En Postgres (dev/CI) se lee del schema public, cargado desde db/northwind.sql.
+        En Databricks se lee de northwind.bronze, cargado por el notebook de ingesta.
+    database: "{{ 'northwind' if target.type == 'databricks' else target.database }}"
+    schema: "{{ 'bronze' if target.type == 'databricks' else 'public' }}"
     tables:
       - name: customers
         description: Clientes que realizan órdenes. Una fila por cliente.
