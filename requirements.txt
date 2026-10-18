@@ -7,6 +7,7 @@ charset-normalizer==3.5.2
 click==8.5.0
 colorama==0.4.6
 daff==1.4.2
+dbt-databricks==1.12.7
 dbt-adapters==1.24.5
 dbt-common==1.39.0
 dbt-core==1.12.5

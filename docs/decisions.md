@@ -12,9 +12,9 @@ order_id que no existe en orders (línea huérfana), un inner join la
 descartaría sin aviso.
 
 Hoy la fuente tiene una clave foránea de order_details hacia orders, así que
-no se generan huérfanos. La decisión anticipa la Fase 2 (datos que llegan
-tarde desde el generador) y la Fase 3 (BigQuery no aplica claves foráneas),
-donde sí pueden aparecer.
+no se generan huérfanos. La decisión anticipa la ingesta incremental (datos
+que llegan tarde) y el warehouse en Databricks, que no hace cumplir claves
+foráneas, donde sí pueden aparecer.
 
 ### Decisión
 Mantener el left join. Una línea huérfana queda en fct_order_lines con nulos
@@ -39,7 +39,8 @@ huérfana sin frenar el build.
   1. Revisar el log de dbt build o del CI: cuántas líneas y qué order_id.
   2. Buscar la causa: ¿la orden falta en la fuente o se perdió en la carga?
   3. Corregir donde corresponda y volver a correr el build.
-- En la Fase 3, este aviso se puede automatizar con una alerta desde Airflow.
+- Cuando el pipeline esté orquestado, este aviso se puede automatizar con una
+  alerta desde Databricks Jobs.
 
 
 ## ADR-002: Modelo estrella en la capa de marts
@@ -81,7 +82,7 @@ Llevar todo a estrella: cada dimensión cuelga directo de las facts.
 ## ADR-003: BigQuery como data warehouse
 
 **Fecha:** 2026-10-15
-**Estado:** Aceptada
+**Estado:** Reemplazada por ADR-004
 
 ### Contexto
 Postgres local hoy es fuente y warehouse a la vez. El proyecto necesita un
@@ -97,5 +98,45 @@ Se arranca en el sandbox, sin costo.
 
 ### Consecuencias
 - Serverless, todo en Google Cloud (Storage, Looker, Gemini).
-- Hay que adaptar SQL de Postgres (ver ADR-004).
+- Hay que adaptar SQL de Postgres.
 - Sin claves foráneas: la integridad queda en los tests de dbt.
+
+
+## ADR-004: Databricks como data warehouse
+
+**Fecha:** 2026-10-18
+**Estado:** Aceptada
+
+### Contexto
+El proyecto necesita un warehouse en la nube, separado de la fuente.
+Databricks Free Edition ofrece Spark, Delta y Unity Catalog sin costo.
+
+### Decisión
+Databricks Free Edition, con capas medallion en el catálogo northwind:
+bronze (carga con PySpark), silver (staging + intermediate) y gold (marts).
+Postgres queda como fuente, desarrollo y CI.
+
+### Consecuencias
+- Sin costo.
+- El proyecto dbt corre en dos motores (ver ADR-005).
+- Se puede orquestar con Databricks Jobs, sin Airflow.
+
+
+## ADR-005: Bronze como string y SQL portable
+
+**Fecha:** 2026-10-18
+**Estado:** Aceptada
+
+### Contexto
+En Databricks fallaron dos cosas que en Postgres andaban: dim_date usaba
+isodow y to_char, que Spark no tiene, y el test de totales daba diferencias
+de centavos porque quantity llegaba como string y la cuenta se hacía en double.
+
+### Decisión
+- Bronze guarda todo como string. Los tipos se definen en staging con cast.
+- Macros day_of_week_iso y month_name eligen el SQL según el motor.
+- generate_schema_name para que los marts vayan a gold y no a silver_gold.
+
+### Consecuencias
+- Los montos se calculan en decimal y cuadran al centavo.
+- El mismo dbt build pasa en Postgres, Databricks y el CI.
