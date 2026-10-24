@@ -9,7 +9,7 @@ Convertir datos crudos de una base transaccional (ventas, clientes, productos) e
 
 ## 🛠️ Stack
 
-Databricks Free Edition (Unity Catalog, Delta, PySpark) · dbt Core (dbt-databricks, dbt-postgres) · PostgreSQL (Docker) · Python · GitHub Actions
+Databricks Free Edition (Unity Catalog, Delta, PySpark, Jobs, AI/BI Dashboards, Genie) · dbt Core (dbt-databricks, dbt-postgres) · PostgreSQL (Docker) · Python · GitHub Actions
 
 ## 🏗️ Arquitectura
 
@@ -27,6 +27,9 @@ SILVER  northwind.silver   staging (tipado y limpieza) + intermediate
    │  dbt
    ▼
 GOLD    northwind.gold     star schema: 5 dimensiones + 2 hechos
+   │
+   ▼
+Dashboard AI/BI + Genie (preguntas en lenguaje natural)
 ```
 
 | Capa medallion | Capa dbt | Materialización |
@@ -64,6 +67,17 @@ Las decisiones de diseño están documentadas en [`docs/decisions.md`](docs/deci
 En cada push, GitHub Actions recrea el proyecto desde cero en una máquina limpia: levanta Postgres, carga Northwind y corre `dbt build` con todos los modelos y tests. Si algo se rompe, el badge se pone en rojo.
 
 Las credenciales no están en el código: el perfil de `ci/profiles.yml` las lee de variables de entorno, y el token de Databricks vive solo en `~/.dbt/profiles.yml`, fuera del repo.
+
+## ⚙️ Orquestación y consumo
+
+Un Databricks Job corre el pipeline todos los días: `ingest_bronze` (notebook) → `dbt_build` (silver + gold y tests), con aviso por mail si falla y timeout por tarea.
+
+Sobre gold hay un dashboard con ventas por mes, top productos, ventas por país y KPIs, y un espacio de Genie para consultar el modelo en lenguaje natural.
+
+## ⚠️ Limitaciones
+
+- Postgres corre en local, así que la exportación de CSV al volume es manual. En un entorno real, Databricks leería la fuente por JDBC o con un conector de ingesta.
+- Los datos son estáticos: cada corrida recarga todo (overwrite), sin carga incremental.
 
 ## 🚀 Cómo levantarlo
 
@@ -103,5 +117,5 @@ La conexión va en `~/.dbt/profiles.yml` (fuera del repo), con un target `dev` p
 - [x] Proyecto dbt portable Postgres ↔ Databricks
 - [x] Tipado completo de todas las columnas en staging
 - [x] Notebook de ingesta versionado en el repo
-- [ ] Orquestación con Databricks Jobs (ingesta → dbt)
-- [ ] Ingesta incremental
+- [x] Orquestación con Databricks Jobs (ingesta → dbt)
+- [x] Dashboard AI/BI y Genie sobre gold
