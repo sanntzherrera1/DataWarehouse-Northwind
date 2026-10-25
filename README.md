@@ -3,34 +3,13 @@
 
 Pipeline ELT que lleva la base transaccional **Northwind** a un modelo dimensional (star schema) con **arquitectura medallion** (bronze → silver → gold) en **Databricks**, transformado con **dbt**. El mismo proyecto dbt corre también sobre **PostgreSQL** local, que se usa para desarrollo y CI.
 
+![Arquitectura](docs/img/img_arquitectura.png)
+
 ## 🎯 Objetivo
 
 Convertir datos crudos de una base transaccional (ventas, clientes, productos) en un modelo limpio y testeado, capaz de responder preguntas reales de negocio.
 
-## 🛠️ Stack
-
-Databricks Free Edition (Unity Catalog, Delta, PySpark, Jobs, AI/BI Dashboards, Genie) · dbt Core (dbt-databricks, dbt-postgres) · PostgreSQL (Docker) · Python · GitHub Actions
-
 ## 🏗️ Arquitectura
-
-```
-PostgreSQL (Docker, fuente)
-   │  export a CSV
-   ▼
-Volume northwind.bronze.raw_files
-   │  notebook PySpark
-   ▼
-BRONZE  northwind.bronze   8 tablas Delta, copia cruda (todo string)
-   │  dbt
-   ▼
-SILVER  northwind.silver   staging (tipado y limpieza) + intermediate
-   │  dbt
-   ▼
-GOLD    northwind.gold     star schema: 5 dimensiones + 2 hechos
-   │
-   ▼
-Dashboard AI/BI + Genie (preguntas en lenguaje natural)
-```
 
 | Capa medallion | Capa dbt | Materialización |
 |---|---|---|
@@ -64,15 +43,20 @@ Las decisiones de diseño están documentadas en [`docs/decisions.md`](docs/deci
 
 ## 🔁 Integración continua
 
-En cada push, GitHub Actions recrea el proyecto desde cero en una máquina limpia: levanta Postgres, carga Northwind y corre `dbt build` con todos los modelos y tests. Si algo se rompe, el badge se pone en rojo.
-
-Las credenciales no están en el código: el perfil de `ci/profiles.yml` las lee de variables de entorno, y el token de Databricks vive solo en `~/.dbt/profiles.yml`, fuera del repo.
+En cada push, GitHub Actions levanta un Postgres limpio, carga Northwind y corre `dbt build`. Las credenciales no están en el repo.
 
 ## ⚙️ Orquestación y consumo
 
-Un Databricks Job corre el pipeline todos los días: `ingest_bronze` (notebook) → `dbt_build` (silver + gold y tests), con aviso por mail si falla y timeout por tarea.
+Job diario: `ingest_bronze` → `dbt_build`, con mail si falla.
 
-Sobre gold hay un dashboard con ventas por mes, top productos, ventas por país y KPIs, y un espacio de Genie para consultar el modelo en lenguaje natural.
+![Job](docs/img/img_job.png)
+
+Dashboard y Genie sobre gold:
+
+![Dashboard](docs/img/img_dashboard.png)
+
+![Genie](docs/img/img_genie_1.png)
+![Genie](docs/img/img_genie_2.png)
 
 ## ⚠️ Limitaciones
 
